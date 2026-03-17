@@ -1,0 +1,80 @@
+I now have a comprehensive picture. Here is my structured analysis.
+
+---
+
+## Federal Budget Summary Anomaly Analysis
+
+### Dataset Description
+
+- **Source**: US Treasury Monthly Treasury Statement (MTS Table 9)
+- **File**: `C:/Users/admin/government-claude/funanomaly/audit/data/federal_budget_summary.csv`
+- **Coverage**: January 2020 through August 2022 (1,000 data rows + header)
+- **Granularity**: Monthly snapshots with ~31 budget categories per month
+- **Fields**: record_date, classification_desc, current_month amount, current fiscal-year-to-date amount, prior fiscal-year-to-date amount
+- **Note**: Fiscal years run October through September. "prior_fytd" represents the same FYTD window in the preceding fiscal year.
+
+---
+
+### Anomaly #1 (Most Striking): Commerce and Housing Credit -- $494 Billion Single-Month Outlay in June 2020
+
+On 2020-06-30, Commerce and Housing Credit recorded a **single-month outlay of $494.3 billion**. For context, this category typically runs $1-6 billion per month. The prior fiscal year FYTD for the same period was **negative $26.9 billion** (i.e., a net inflow), while the current FYTD exploded to **$528.0 billion**. This represents a swing of roughly **$555 billion year-over-year** for the FYTD.
+
+**Why it matters**: This is the Paycheck Protection Program (PPP) and related CARES Act lending programs administered through SBA, which are classified under Commerce and Housing Credit. The magnitude of a single category going from a net negative (profitable lending programs returning more than they cost) to over half a trillion in a single fiscal year is unprecedented. By FY2020 year-end (Sept 2020), the FYTD reached **$571.7 billion** vs. the prior year's **negative $26.1 billion** -- a net swing of nearly **$598 billion**.
+
+---
+
+### Anomaly #2: Income Security Spending Explosion -- $307 Billion Month (April 2020)
+
+Income Security outlays in **April 2020 hit $307.2 billion** in a single month, compared to a typical monthly run rate of $39-46 billion (Jan-Mar 2020). This is roughly a **7x increase**. By the end of FY2020, the FYTD reached **$1.263 trillion** versus the prior year's **$515.4 billion** -- a **$747 billion (145%) increase**.
+
+The spending remained elevated well into FY2021, with another major spike in **March 2021 at $452.6 billion** (the American Rescue Plan's stimulus checks and extended unemployment benefits). The FY2021 total reached **$1.649 trillion**.
+
+**Why it matters**: The April 2020 single-month figure alone exceeded many countries' entire annual budgets. The March 2021 spike ($452.6B) was actually *larger* than the April 2020 spike, representing the second round of massive direct payments.
+
+---
+
+### Anomaly #3: General Government -- $144.9 Billion Spike in April 2020 (74x Normal)
+
+General Government outlays are typically $1-5 billion per month. In **April 2020, the category spiked to $144.9 billion** -- roughly **74 times the normal monthly level**. Prior year FYTD for the same period was $9.0 billion; the current FYTD jumped to $153.3 billion. This is the Economic Impact Payments (stimulus checks) administered by Treasury/IRS flowing through the General Government classification.
+
+A similar spike recurred in **May 2021 at $132.1 billion** and **June 2021 at $68.2 billion** (third round of stimulus checks under the American Rescue Plan).
+
+**Why it matters**: The sheer ratio of spike-to-baseline is the largest of any category in the dataset. A category that normally handles routine government operations suddenly became one of the largest single-month outlays in U.S. history.
+
+---
+
+### Anomaly #4: Excise Tax Revenue Collapse -- Lost ~$12 Billion in FY2020
+
+Excise Taxes show a dramatic year-over-year decline throughout all of FY2020. The prior FYTD column consistently runs well ahead:
+- By January 2020: current FYTD $26.9B vs. prior $36.2B (down 26%)
+- By September 2020 (full year): $86.8B vs. prior $98.9B (down 12%)
+
+The most extreme monthly drop was **April 2020: only $353 million** in excise taxes, compared to $6-7 billion in normal months -- a **95% single-month decline**. This reflects the near-total shutdown of travel, fuel consumption, and taxable economic activity during lockdowns.
+
+Excise taxes did not recover to prior-year levels until the FY2022 period (Oct 2021 onward).
+
+---
+
+### Anomaly #5: Net Interest Payments -- Negative in September and Rising Rapidly
+
+Net Interest payments went **negative** in two September end-of-fiscal-year entries:
+- **September 2020**: -$1.26 billion
+- **September 2021**: -$5.94 billion
+
+These negative months appear to be fiscal year-end accounting adjustments (accrual reversals). The full-year FY2020 FYTD net interest actually *declined* from $375.6B to $344.7B despite dramatically higher debt levels -- reflecting the sharp drop in interest rates.
+
+By contrast, the FY2022 data shows net interest **surging** as rates rose. By July 2022, the FYTD reached $408.8 billion vs. $316.4 billion the prior year -- a **29% increase** -- with the monthly figure hitting $55.3 billion in July 2022 (vs. ~$30B in typical months earlier). This presaged the interest cost explosion that would define subsequent fiscal years.
+
+---
+
+### Data Quality Issues
+
+1. **"null" values as category headers**: The categories "Receipts", "Net Outlays", and "Social Insurance and Retirement Receipts:" always have "null" for all three numeric fields. These are section headers/grouping labels, not data rows. There are approximately 90-100 such null rows (3 per month for ~31 months).
+
+2. **Negative monthly amounts in unexpected places**: Several categories show negative single-month values (e.g., Corporation Income Taxes at -$2.0B in Feb 2020, -$3.2B in Nov 2020; Energy at -$3.4B in Jul 2022; Commerce and Housing Credit at -$22.5B in Jun 2022). These likely represent refunds exceeding collections, accounting reclassifications, or credit subsidy re-estimates rather than data errors.
+
+3. **Minor FYTD continuity discrepancies**: Some Total FYTD figures show minor rounding differences when compared across the prior_fytd field of the next fiscal year (e.g., 2020-09-30 Total FYTD = $9,971,827,260,418.98 but 2021-09-30's prior_fytd = $9,971,831,225,771.98 -- a $3.97 million difference). These likely reflect post-hoc revisions to prior-year figures.
+
+4. **Dataset ends mid-fiscal-year**: The data cuts off at August 2022, which is FY2022 month 11 (one month before fiscal year-end), making full FY2022 comparisons incomplete.
+
+5. **Row ordering is inconsistent**: Categories do not appear in the same order each month (e.g., February 2020 has categories shuffled compared to January 2020), suggesting the data was not normalized before export.

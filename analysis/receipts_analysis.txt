@@ -1,0 +1,81 @@
+Confirmed -- September 2021 is truncated (no "Total -- Receipts" row). Now I have everything needed for the analysis.
+
+---
+
+Here is the structured analysis:
+
+## Dataset Description
+
+- **Source**: US Treasury Monthly Treasury Statement (MTS), Table 4 -- Federal Receipts by Source
+- **File**: `C:/Users/admin/government-claude/funanomaly/audit/data/federal_receipts_by_source.csv`
+- **Coverage**: January 2020 through September 2021 (20 monthly records; September 2021 is truncated)
+- **Records**: 1,000 data rows across ~50 classification categories per month
+- **Fields**: record_date, classification_desc, current_month_net_rcpt_amt, current_fytd_net_rcpt_amt, prior_fytd_net_rcpt_amt
+- **Note**: Federal fiscal years run October-September, so FY2020 = Oct 2019-Sep 2020
+
+---
+
+## Top 5 Anomalies (ranked by significance)
+
+### Anomaly 1: Massive FICA Adjustment Swing -- $46 Billion Reversal (June 2021)
+
+The single most striking data point in the entire dataset. In June 2021, "Adjustments Attributable to Prior Years-FICA" recorded a monthly amount of **-$43,986,300,615.84** (negative $44 billion in a single month). This flipped the FYTD figure from a positive accumulation to **-$38,015,240,764.00**. The prior year's FYTD for the same period was **+$8,379,688,362.27** -- a swing of over **$46 billion**.
+
+**Why this is extraordinary**: A $44 billion single-month negative FICA adjustment dwarfs any other line-item movement in the dataset. This likely reflects a massive retroactive correction related to COVID-era payroll tax deferrals (the CARES Act allowed employers to defer the employer share of Social Security taxes from March-December 2020, with repayment due in 2021-2022). The sheer magnitude -- nearly $44 billion in one adjustment -- is remarkable even in federal accounting.
+
+### Anomaly 2: COVID Collapse of Airport and Airway Trust Fund (April-August 2020)
+
+The Airport and Airway Trust Fund, funded primarily by airline ticket taxes, shows a near-total revenue collapse:
+- **Pre-COVID**: $2,854,352,418 (Feb 2020), $1,291,336,000 (Mar 2020)
+- **Collapse**: $661,931,000 (Apr 2020), then **-$571,489,462** (May 2020 -- actually negative), $7,713,000 (Jun 2020), $13,464,000 (Jul 2020), $10,288,283 (Aug 2020)
+- **FYTD comparison**: By Sep 2020, FYTD was $9.0B vs. prior year $16.0B -- a **44% decline**
+- **Recovery**: Did not meaningfully recover until Jan 2021 ($1.14B), and by Aug 2021 FYTD was $10.3B vs $9.1B prior year, showing recovery
+
+Monthly revenue went from ~$1-3 billion to effectively **zero (or negative)** for five months. The May 2020 negative figure means refunds exceeded new collections -- airlines were getting money back while virtually no tickets were being sold.
+
+### Anomaly 3: Corporation Income Tax Revenue -- COVID Drop then FY2021 Explosion (+75%)
+
+Full fiscal year comparison:
+- **FY2020 (Sep 2020 FYTD)**: $211,844,662,323 vs. prior year $230,244,746,813 -- a **decline of 8%**
+- **FY2021 (Sep 2021 FYTD)**: $371,831,354,722 vs. prior year $211,844,662,323 -- a **surge of 75.5%**
+
+Notable monthly swings:
+- Feb 2020: **-$2,041,301,783** (negative -- net refunds exceeded collections)
+- May 2020: **-$1,795,033,697** (negative again)
+- Nov 2020: **-$3,192,121,638** (largest negative month)
+- Apr 2021: **+$72,768,883,362** (massive quarterly estimated payment month)
+- Jun 2021: **+$74,188,859,129**
+- Sep 2021: **+$86,712,836,649** (highest single month in the dataset)
+
+The FY2021 corporate tax take of $372B was 75% higher than FY2020's $212B and 62% higher than the pre-COVID FY2019 figure implied by the data ($230B). This reflects the corporate profit boom during recovery.
+
+### Anomaly 4: Excise Tax FYTD Collapse -- Miscellaneous Excise Taxes Halved
+
+Miscellaneous Excise Taxes shows a dramatic and persistent shortfall:
+- **Jan 2020 FYTD**: $8,900,131,429 vs. prior year FYTD $19,622,362,367 -- already **55% below** prior year
+- **FY2020 full year (Sep 2020)**: $34,700,905,526 vs. prior year $39,050,160,677 -- down 11%
+- Total Excise Taxes FY2020: $86.8B vs. prior year $98.9B -- **down 12.3%**
+
+The January 2020 comparison (pre-COVID) already showed a 55% FYTD gap in Miscellaneous Excise Taxes, suggesting a structural change (likely a policy change or repeal of the Affordable Care Act's health insurance tax, which was suspended for 2019 and later repealed). This is distinct from the COVID impact.
+
+### Anomaly 5: Federal Reserve Remittances -- Surging During COVID
+
+Deposit of Earnings from the Federal Reserve System shows a striking counter-cyclical pattern:
+- **FY2020 full year**: $81,880,086,657 vs. prior year $52,793,314,498 -- **up 55%**
+- **FY2021 (through Aug)**: $88,710,265,729 vs. prior year $72,154,582,397 -- **up 23%** with one month still remaining
+
+While most revenue sources fell during COVID, Fed remittances surged because the Federal Reserve's balance sheet expanded massively (from ~$4T to ~$8T) through quantitative easing, generating significantly higher interest income that was remitted to the Treasury. This is notable because it represents an indirect fiscal benefit of monetary policy -- the Fed's emergency actions effectively generated tens of billions in additional Treasury revenue.
+
+---
+
+## Data Quality Issues
+
+1. **Truncated final month**: September 2021 data is incomplete -- the file ends at line 1001 mid-record (FICA adjustments), missing the Total lines and many categories. There is no "Total -- Receipts" row for 2021-09-30.
+
+2. **Inconsistent field naming**: "Adjustments Attrbutable to Prior Years-SECA" (typo -- missing "i" in "Attributable") appears alongside the correctly spelled "Adjustments Attributable to Prior Years-SECA" for the Hospital Insurance trust fund. These are two different line items (OASI vs HI) but the inconsistent spelling makes automated parsing error-prone.
+
+3. **Extensive null values**: Many rows are category headers (e.g., "Social Insurance and Retirement Receipts:", "Employment and General Retirement:") with all three amount fields set to the string "null" rather than being absent. These are structural hierarchy markers, not actual data points.
+
+4. **String-encoded numerics**: All amount fields are quoted strings (including "null"), requiring type conversion for analysis. The "null" values are literal strings, not proper CSV nulls.
+
+5. **Minor FYTD discrepancy**: The "Total -- Receipts" prior_fytd for 2021-08-31 is $3,046,785,658,**953.09**, while the current_fytd for 2020-08-31 is $3,046,785,657,**811.68** -- a difference of $1,141.41. This is tiny relative to $3 trillion but suggests a minor retroactive revision between reporting periods.

@@ -1,0 +1,85 @@
+I can confirm 2021-04-30 is missing "Treasury Bills", "Total Non-marketable", and "Total Interest-bearing Debt". Now I have all the data I need for a thorough analysis.
+
+---
+
+## Federal Interest Rate Anomaly Analysis
+
+### Dataset Description
+- **Source**: US Treasury "Average Interest Rates on U.S. Treasury Securities"
+- **File**: `C:/Users/admin/government-claude/funanomaly/audit/data/federal_interest_rates.csv`
+- **Date Range**: April 2021 through February 2026 (59 monthly snapshots)
+- **Total Rows**: 1,001 data rows
+- **Fields**: record_date, security_desc (17 distinct security types including subtotals), avg_interest_rate_amt, security_type_desc (Marketable, Non-marketable, Interest-bearing Debt)
+- **Security Types**: Treasury Bills, Treasury Notes, Treasury Bonds, TIPS, FRN, Federal Financing Bank, Domestic Series, Foreign Series, Special Purpose Vehicle, State and Local Government Series, US Savings Securities, US Savings Inflation Securities, Government Account Series, Government Account Series Inflation Securities, plus three "Total" roll-up rows
+
+---
+
+### Anomaly #1 (Most Interesting): US Savings Inflation Securities hit 10.251% -- the highest rate in the entire dataset
+
+The "United States Savings Inflation Securities" (I Bonds) reached a peak average rate of **10.251%** in September 2022 and **10.148%** in November 2022. This was the single highest interest rate for any security type in the entire dataset (excluding the frozen legacy Domestic/Foreign series). The trajectory was dramatic:
+
+- 2021-04: 3.425%
+- 2022-05: 8.911%
+- 2022-09: **10.251%** (peak)
+- 2022-11: 10.148%
+- Then a sharp drop to 7.688% in Oct 2022 before rebounding to 10.148% in Nov 2022
+
+Then a steady decline: 9.621% (Dec 2022) down to 3.081% (Apr 2025), and back up slightly to 4.248% (Feb 2026). This reflects the lag in I Bond composite rate adjustments tracking CPI inflation, which peaked in mid-2022.
+
+The **October 2022 dip to 7.688%** sandwiched between September's 10.251% and November's 10.148% is itself an anomaly -- a sudden 2.5 percentage point drop and recovery in a single month, which likely reflects the semi-annual rate reset timing for I Bonds.
+
+---
+
+### Anomaly #2: Foreign Series drops from 7.312% to 0.000% overnight
+
+The "Foreign Series" non-marketable security held a perfectly flat rate of **7.312%** from April 2021 through February 2023 (23 consecutive months). Then in March 2023, it dropped to exactly **0.000%** and stayed there for the remaining 35 months through February 2026.
+
+This is a cliff-edge discontinuity -- from one of the highest rates in the dataset to literally zero with no transition. This almost certainly reflects the maturity or retirement of the last outstanding Foreign Series obligations rather than a rate change, but the data does not distinguish between "no outstanding balance" and "zero interest rate." This is a notable data representation issue: 0.000% is ambiguous -- it could mean zero-rate debt or no debt outstanding.
+
+---
+
+### Anomaly #3: Domestic Series frozen at exactly 7.577% for 59 straight months
+
+The "Domestic Series" rate is **7.577%** in every single month of the dataset, from April 2021 through February 2026. This is a legacy non-marketable security type whose rate has not changed once. At 7.577%, it is the highest persistent rate in the entire dataset, more than double the typical marketable security rate and far above the Total Interest-bearing Debt rate (which ranges from 1.556% to 3.372%).
+
+This frozen rate represents legacy obligations from a much higher interest rate era. The government is paying 7.577% on this debt while issuing new Treasury Bills at rates as low as 0.045% (June 2021). The spread between this legacy rate and the rest of the portfolio is striking.
+
+---
+
+### Anomaly #4: Treasury Bills 100x increase -- from 0.045% to 5.451%
+
+Treasury Bills went from **0.045%** (June 2021) to **5.451%** (November 2023), a factor of **121x** increase. The trajectory:
+
+- Jun 2021: 0.045% (near-zero, reflecting ZIRP)
+- Jan 2022: 0.103%
+- Jun 2022: 1.073%
+- Dec 2022: 3.891%
+- Nov 2023: **5.451%** (peak)
+- Feb 2026: 3.720% (declining from peak)
+
+This is the most dramatic rate movement in the dataset in absolute and relative terms. It directly mirrors the Federal Reserve's rate hiking cycle. Meanwhile, Treasury Bonds only moved from ~3.0% to ~3.4% over the same period -- the short end of the yield curve was far more volatile than the long end, reflecting the classic dynamics of an inverted yield curve era.
+
+---
+
+### Anomaly #5: Special Purpose Vehicle rate trajectory from 0.000% to 4.172% and back
+
+The "Special Purpose Vehicle" (SPV) -- likely related to the Federal Reserve's emergency lending facilities -- shows an extreme range:
+
+- May 2021: **0.000%**
+- Sep 2021: 0.020%
+- Aug 2023: **4.172%** (peak)
+- Feb 2026: 2.781%
+
+This near-zero-to-peak movement closely tracks the Fed funds rate and T-Bill rate, suggesting SPV debt is floating-rate or very short-term. The SPV category itself is noteworthy as an unusual security type that appeared in the dataset alongside conventional instruments.
+
+---
+
+### Data Quality Issues
+
+1. **Missing records for April 2021**: The 2021-04-30 snapshot is missing 3 records that are present in all other months: "Treasury Bills", "Total Non-marketable", and "Total Interest-bearing Debt". This means April 2021 has only 14 rows instead of the standard 17. This is a data completeness gap.
+
+2. **Inconsistent row ordering**: From approximately October 2021 backward, the row order within each monthly snapshot is shuffled (e.g., TIPS appears after non-marketable securities rather than with other marketable ones). While this does not affect data integrity, it suggests possible changes in the upstream data export process.
+
+3. **Ambiguous zero rates**: The Foreign Series 0.000% values (March 2023 onward) are indistinguishable from a genuine zero-interest security. A null or N/A value would be more appropriate if there is no outstanding debt in this category.
+
+4. **Three security_type_desc categories**: The "Total Interest-bearing Debt" row uses the type "Interest-bearing Debt" rather than "Marketable" or "Non-marketable", creating a third category that is really an aggregate rather than a true security type.
