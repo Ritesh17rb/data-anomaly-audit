@@ -11,11 +11,11 @@
 
 | # | Dataset | Source Table | Period | Records | File |
 |---|---------|-------------|--------|---------|------|
-| 1 | Federal Spending by Agency | MTS Table 5 | Jan 2024 (FY2024 FYTD) | 500 | `federal_spending_by_agency.csv` |
-| 2 | Federal Debt Daily | Debt to the Penny | Mar 2022 -- Mar 2026 | 1,000 | `federal_debt_daily.csv` |
-| 3 | Federal Receipts by Source | MTS Table 4 | Jan 2020 -- Sep 2021 | 1,000 | `federal_receipts_by_source.csv` |
-| 4 | Federal Interest Rates | Avg Interest Rates on Treasury Securities | Apr 2021 -- Feb 2026 | 1,000 | `federal_interest_rates.csv` |
-| 5 | Federal Budget Summary | MTS Table 9 | Jan 2020 -- Aug 2022 | 1,000 | `federal_budget_summary.csv` |
+| 1 | Federal Spending by Agency | MTS Table 5 | Jan 2024 (FY2024 FYTD) | 500 | [federal_spending_by_agency.csv](data/federal_spending_by_agency.csv) |
+| 2 | Federal Debt Daily | Debt to the Penny | Mar 2022 -- Mar 2026 | 1,000 | [federal_debt_daily.csv](data/federal_debt_daily.csv) |
+| 3 | Federal Receipts by Source | MTS Table 4 | Jan 2020 -- Sep 2021 | 1,000 | [federal_receipts_by_source.csv](data/federal_receipts_by_source.csv) |
+| 4 | Federal Interest Rates | Avg Interest Rates on Treasury Securities | Apr 2021 -- Feb 2026 | 1,000 | [federal_interest_rates.csv](data/federal_interest_rates.csv) |
+| 5 | Federal Budget Summary | MTS Table 9 | Jan 2020 -- Aug 2022 | 1,000 | [federal_budget_summary.csv](data/federal_budget_summary.csv) |
 
 ---
 
